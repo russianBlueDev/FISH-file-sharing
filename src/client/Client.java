@@ -1,58 +1,42 @@
 package client;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.List;
-
-import filesystem.Directory;
-import filesystem.IDirectory;
 
 public class Client {
 
-	private boolean sharing;
-	private String serverAddress;
-	private int serverPort;
+	private File shared_dir;
+	private List<String> shared_files;
+	private Socket socket;
 
-	public IDirectory shared_dir;
-	public IServer server;
-
-	public Client() {
-		this.sharing = false;
-		this.shared_dir = new Directory();
-		this.server = new Server();
-	}
-
-	public void share(String serverAddress, int serverPort, String shared_path) throws IOException {
-
-		if (sharing) {
-			throw new IllegalArgumentException("Client is already sharing");
-		}
-
-		this.sharing = true;
-		this.serverAddress = serverAddress;
-		this.serverPort = serverPort;
-		shared_dir.open(shared_path);
-
-		// Check that dir is not empty
-		List<String> filenames = shared_dir.get_files();
-		if (filenames.size() == 0) {
+	public void share(String serverAddress, int serverPort, String shared_path)
+			throws UnknownHostException, IOException {
+		shared_dir = new File(shared_path);
+		if (!shared_dir.isDirectory()) {
 			throw new IllegalArgumentException(shared_path
-					+ ": Directory is empty");
+					+ ": Not a directory");
 		}
-
-		// Check that no file contains whitespaces
-		for (String fname : filenames) {
-			if (fname.contains(" ")) {
-				throw new IllegalArgumentException(shared_path + ": the file "
-						+ fname + " contains a whitespace in its name");
+		shared_files = Arrays.asList(shared_dir.list(new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				return new File(dir + File.separator + name).isFile();
 			}
-		}
-
-		// try to connect to server
-		server.connect(serverAddress, serverPort);
+		}));
+		socket = new Socket(serverAddress, serverPort);
+		ObjectOutputStream os = new ObjectOutputStream(socket.getOutputStream());
+		os.writeObject(shared_files);
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws UnknownHostException,
+			IOException {
 		System.out.println("Hello from Client");
+		new Client().share("localhost", 12345, "..");
 	}
 
 }
