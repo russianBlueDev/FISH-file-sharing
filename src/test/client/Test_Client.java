@@ -1,12 +1,14 @@
 package test.client;
 
-import static org.junit.Assert.*;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import client.Client;
+import filesystem.MockDirectory;
+import filesystem.MockDirectory.MOCK_DIR_MODE;
 
 public class Test_Client {
 
@@ -18,8 +20,11 @@ public class Test_Client {
 	public static void tearDownAfterClass() throws Exception {
 	}
 
+	private Client client;
+
 	@Before
 	public void setUp() throws Exception {
+		client = new Client();
 	}
 
 	@After
@@ -27,8 +32,15 @@ public class Test_Client {
 	}
 
 	@Test
-	public void test() {
-		fail("Not yet implemented");
+	public void TestShareOK() {
+		client.shared_dir = new MockDirectory(MOCK_DIR_MODE.DIR_OK);
+		client.share("localhost", 6925, "share");
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void TestShareNotOK() {
+		client.shared_dir = new MockDirectory(MOCK_DIR_MODE.DIR_NOT_OK);
+		client.share("localhost", 6925, "share");
 	}
 
 }
