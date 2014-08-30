@@ -35,8 +35,13 @@ public class Client {
 
 	public static void main(String[] args) throws UnknownHostException,
 			IOException {
-		System.out.println("Hello from Client");
-		new Client().share("localhost", 12345, "..");
+		if(args.length < 1) {
+			System.out.println("USAGE:\njava Client shared_file_path [server_address] [server_port]");
+			System.exit(0);
+		}
+		String shared_dir = args[0];
+		String serverAddress = args.length > 1 ? args[1] : "localhost";
+		int serverPort = args.length > 2 ? Integer.parseInt(args[2]) : 12345;
+		new Client().share(serverAddress, serverPort, shared_dir);
 	}
-
 }
