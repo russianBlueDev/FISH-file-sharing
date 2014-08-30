@@ -24,4 +24,8 @@ Sample Execution (Server side)
 * new Client: client2 from 218.244.244.243:2323
 * client2 requests file3.txt: not found
 * client3 requests file2.txt: found from client1(123.234.245.233:2434)
+* (client2 asks client1 directly for file2.txt)
+* (transfer of file2.txt)
+* client2 exits
+* client1 does not respond to ping: removes it and its shared files
 
