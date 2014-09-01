@@ -15,9 +15,12 @@ public class Server {
 		Socket s = ss.accept();
 		System.out.println("Accepted connection from " + s.getInetAddress() + ":" + s.getPort());
 		ObjectInputStream is = new ObjectInputStream(s.getInputStream());
-		System.out.println((String)is.readObject());
-		System.out.println((List<String>)is.readObject());
-		System.out.println((String) is.readObject());
+		String action = (String)is.readObject();
+		System.out.println(action);
+		if(action.equals("SHARE")) {
+			System.out.println((List<String>)is.readObject());
+			System.out.println((String) is.readObject());
+		}
 		ss.close();
 	}
 

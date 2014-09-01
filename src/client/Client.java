@@ -18,21 +18,25 @@ public class Client {
 
 	public Client share(String serverAddress, int serverPort, String shared_path)
 			throws UnknownHostException, IOException {
-		shared_dir = new File(shared_path);
-		if (!shared_dir.isDirectory()) {
-			throw new IllegalArgumentException(shared_path
-					+ ": Not a directory");
-		}
-		shared_files = Arrays.asList(shared_dir.list(new FilenameFilter() {
-			@Override
-			public boolean accept(File dir, String name) {
-				return new File(dir + File.separator + name).isFile();
+		if (shared_path != null) {
+			shared_dir = new File(shared_path);
+			if (!shared_dir.isDirectory()) {
+				throw new IllegalArgumentException(shared_path
+						+ ": Not a directory");
 			}
-		}));
+			shared_files = Arrays.asList(shared_dir.list(new FilenameFilter() {
+				@Override
+				public boolean accept(File dir, String name) {
+					return new File(dir + File.separator + name).isFile();
+				}
+			}));
+		}
 		socket = new Socket(serverAddress, serverPort);
 		os = new ObjectOutputStream(socket.getOutputStream());
-		os.writeObject("SHARE");
-		os.writeObject(shared_files);
+		if(shared_path != null) {
+			os.writeObject("SHARE");
+			os.writeObject(shared_files);
+		}
 		return this;
 	}
 
@@ -42,14 +46,26 @@ public class Client {
 
 	public static void main(String[] args) throws UnknownHostException,
 			IOException {
-		if (args.length < 1) {
+		if (args.length > 3) {
 			System.out
-					.println("USAGE:\njava Client shared_file_path [server_address] [server_port]");
+					.println("USAGE:\njava Client [shared_file_path] [server_address] [server_port]");
 			System.exit(0);
 		}
-		String shared_dir = args[0];
-		String serverAddress = args.length > 1 ? args[1] : "localhost";
-		int serverPort = args.length > 2 ? Integer.parseInt(args[2]) : 12345;
+
+		String shared_dir = null;
+		String serverAddress = "localhost";
+		int serverPort = 12345;
+
+		for (String arg : args) {
+			if (arg.matches("\\w.*\\..*\\w") && !arg.matches("/")) {
+				serverAddress = arg;
+			} else if (arg.matches("^[0-9]$")) {
+				serverPort = Integer.parseInt(arg);
+			} else {
+				shared_dir = arg;
+			}
+		}
+		
 		new Client().share(serverAddress, serverPort, shared_dir).unshare();
 	}
 }
