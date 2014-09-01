@@ -33,7 +33,7 @@ public class Client {
 		}
 		socket = new Socket(serverAddress, serverPort);
 		os = new ObjectOutputStream(socket.getOutputStream());
-		if(shared_path != null) {
+		if (shared_path != null) {
 			os.writeObject("SHARE");
 			os.writeObject(shared_files);
 		}
@@ -44,8 +44,7 @@ public class Client {
 		os.writeObject("UNSHARE");
 	}
 
-	public static void main(String[] args) throws UnknownHostException,
-			IOException {
+	public static void main(String[] args) {
 		if (args.length > 3) {
 			System.out
 					.println("USAGE:\njava Client [shared_file_path] [server_address] [server_port]");
@@ -65,7 +64,13 @@ public class Client {
 				shared_dir = arg;
 			}
 		}
-		
-		new Client().share(serverAddress, serverPort, shared_dir).unshare();
+
+		try {
+			new Client().share(serverAddress, serverPort, shared_dir).unshare();
+		} catch (UnknownHostException e) {
+			System.err.println(serverAddress + ": Unknown host");
+		} catch (IOException e) {
+			System.err.println("Server Communication Failure");
+		}
 	}
 }
