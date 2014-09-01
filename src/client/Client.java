@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 
 public class Client {
 
@@ -65,12 +66,32 @@ public class Client {
 			}
 		}
 
+		Client cl = null;
 		try {
-			new Client().share(serverAddress, serverPort, shared_dir).unshare();
+			cl = new Client().share(serverAddress, serverPort, shared_dir);
 		} catch (UnknownHostException e) {
 			System.err.println(serverAddress + ": Unknown host");
+			System.exit(0);
 		} catch (IOException e) {
 			System.err.println("Server Communication Failure");
+			System.exit(0);
+		}
+		
+		Scanner sc = new Scanner(System.in);
+		while(true) {
+			System.out.print("> ");
+			String cmd = sc.nextLine();
+			
+			if(cmd.equals("exit")) {
+				try {
+					cl.unshare();
+				} catch (IOException e) {
+					System.err.println("Server Communication Failure on exit");
+				}
+				System.exit(0);
+			} else {
+				System.out.println("Unrecognized Command");
+			}
 		}
 	}
 }
